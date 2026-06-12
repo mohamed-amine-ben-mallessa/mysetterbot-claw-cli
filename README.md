@@ -101,6 +101,22 @@ python fixups.py --check    # CI: exit 1 if the guard is missing
 
 See [`patches/instagrapi-empty-media-versions.patch`](patches/instagrapi-empty-media-versions.patch).
 
+## Skill, scripts & docs
+
+For AI agents (Claude Code / Cursor / any MCP-style runner) and humans:
+
+```
+skills/instagram-cli/SKILL.md   portable agent skill (when/how to drive the CLI)
+scripts/ig.py                   dependency-free wrapper: run a subcommand, get parsed JSON
+ref/COMMANDS.md                 every command, args, examples, the JSON envelope
+ref/SAFETY.md                   the anti-ban playbook (read before growth actions)
+```
+
+```bash
+python scripts/ig.py dm inbox --limit 5
+python scripts/ig.py user info <username>
+```
+
 ## Exit codes
 
 `0` success · `1` user error · `2` auth/session · `3` rate-limited · `4` API error ·
