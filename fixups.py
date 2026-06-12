@@ -55,8 +55,16 @@ def main() -> int:
     with open(path, "r", encoding="utf-8") as f:
         src = f.read()
 
-    if MARKER in src:
-        print(f"[ok] patch already present: {path}")
+    # Already patched? Accept either our explicit marker OR the equivalent guard
+    # (an empty-list guard around the candidates/version sort), so a manually
+    # applied fix is recognized too.
+    already = (
+        MARKER in src
+        or 'candidates = (media.get("image_versions2") or {}).get("candidates") or []' in src
+        or '(media.get("image_versions2") or {}).get("candidates") or []' in src
+    )
+    if already:
+        print(f"[ok] patch already present (guard found): {path}")
         return 0
 
     if BEFORE not in src:
