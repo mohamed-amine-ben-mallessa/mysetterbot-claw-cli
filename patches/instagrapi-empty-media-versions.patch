@@ -1,0 +1,52 @@
+# Patch: guard against empty media version lists in instagrapi
+#
+# Problem
+# -------
+# `clinstagram dm thread <id>` (and any DM read) crashes with:
+#     dm_thread failed: list index out of range
+# when a thread contains a DM media item (voice note `voice_media`,
+# `video_call_event`, some shared media) whose image/video version list is empty.
+#
+# Root cause is upstream in instagrapi (reproduced on 2.9.9 AND 2.9.11 — identical
+# code, not fixed upstream): `extract_direct_media()` in instagrapi/extractors.py
+# does `sorted(...)[-1]` on `image_versions2["candidates"]` and `video_versions`
+# without checking the list is non-empty -> IndexError aborts the WHOLE thread read.
+#
+# Fix
+# ---
+# Wrap each `sorted(...)[-1]` in an emptiness guard. A media with no usable
+# thumbnail/video version simply gets that field left unset instead of crashing.
+#
+# Apply
+# -----
+# This must be applied to the *installed* instagrapi, because the bug is in the
+# dependency, not in our code. After any `pip install/upgrade instagrapi`, re-run:
+#     python -m mysetterbot_claw_cli.fixups        # (or manually re-apply below)
+#
+# Target function (instagrapi/extractors.py): extract_direct_media
+#
+# --- BEFORE -------------------------------------------------------------------
+# def extract_direct_media(data):
+#     media = deepcopy(data)
+#     if "video_versions" in media:
+#         media["video_url"] = sorted(media["video_versions"], key=lambda o: o["height"] * o["width"])[-1]["url"]
+#     if "image_versions2" in media:
+#         media["thumbnail_url"] = sorted(
+#             media["image_versions2"]["candidates"],
+#             key=lambda o: o["height"] * o["width"],
+#         )[-1]["url"]
+#
+# --- AFTER --------------------------------------------------------------------
+# def extract_direct_media(data):
+#     media = deepcopy(data)
+#     if "video_versions" in media:
+#         versions = media.get("video_versions") or []
+#         if versions:
+#             media["video_url"] = sorted(versions, key=lambda o: o["height"] * o["width"])[-1]["url"]
+#     if "image_versions2" in media:
+#         candidates = (media.get("image_versions2") or {}).get("candidates") or []
+#         if candidates:
+#             media["thumbnail_url"] = sorted(
+#                 candidates,
+#                 key=lambda o: o["height"] * o["width"],
+#             )[-1]["url"]
