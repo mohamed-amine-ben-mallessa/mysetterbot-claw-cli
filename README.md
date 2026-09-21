@@ -2,28 +2,35 @@
 
 <p align="center">
   <b>The Instagram action layer for AI agents.</b><br>
-  One JSON-clean command for DMs, posts, stories, comments, follows, analytics — Graph API <i>and</i> private API.
+  One JSON-clean command for DMs, posts, stories, comments, follows, analytics — Graph API <i>and</i> private API, with your session in the OS keychain.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/instagram-CLI-E1306C?logo=instagram&logoColor=white" alt="Instagram">
   <img src="https://img.shields.io/badge/agent--ready-JSON%20envelope-6E59F7" alt="Agent-ready">
+  <img src="https://img.shields.io/badge/session-OS%20keychain-1f9d55" alt="Keychain">
   <img src="https://img.shields.io/badge/python-%E2%89%A53.10-blue?logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT">
 </p>
+
+```bash
+pip install -e .
+msbc auth login --username <you>
+msbc --json dm inbox --limit 20
+```
 
 ---
 
 > This is the **CLI half** of MySetterBot Claw. The other half is
 > [**mysetterbot-claw**](https://github.com/mohamed-amine-ben-mallessa/mysetterbot-claw) —
-> an MCP server that wraps these actions as agent tools and adds a free LLM layer
+> an MCP server that wraps these actions as 42 agent tools and adds a free LLM layer
 > that writes the openers, follow-ups and qualification messages.
 
-## Why
+## Why this exists
 
-Most "Instagram automation" is brittle browser macros or paid SaaS. Agents need
-something different: **a single binary that speaks JSON**, returns predictable
-exit codes, and keeps credentials out of plaintext. That's this.
+Most "Instagram automation" is a brittle browser macro or a paid SaaS dashboard. An agent
+needs neither. It needs **one binary that speaks JSON**, returns predictable exit codes, and
+keeps credentials out of plaintext.
 
 - 🔐 **Sessions in your OS keychain** — never in a file, never in `.env`.
 - 📦 **Clean JSON envelope** — `{ exit_code, data, backend_used }` on every call.
@@ -31,15 +38,16 @@ exit codes, and keeps credentials out of plaintext. That's this.
 - 🛡️ **Growth gate** — follow / like / comment are *locked by default* behind
   `--enable-growth-actions` to protect the account.
 - 🧩 **Agent manifest** — `msbc --json agent-info` returns the full machine-readable
-  capability map (every command, args, exit codes, backends).
+  capability map (every command, args, exit codes, backends). Your agent discovers the
+  tool instead of guessing at it.
 
 ## Install
 
-```bash
-pip install -e .          # from this repo
-# or, once published:
-# pip install mysetterbot-claw-cli
-```
+| Surface | Install | Notes |
+|---|---|---|
+| **From this repo** | `pip install -e .` | Python ≥ 3.10 |
+| **Agent Skills hosts** (Claude Code, Codex, Cursor, Copilot, Gemini CLI, +50 more) | `npx skills add mohamed-amine-ben-mallessa/mysetterbot-claw-cli -g` | Installs [`skills/instagram-cli`](skills/instagram-cli/SKILL.md) |
+| **With the MCP layer** | [mysetterbot-claw](https://github.com/mohamed-amine-ben-mallessa/mysetterbot-claw) | Recommended — adds dry-run, quotas, and the free-LLM copywriting |
 
 Two entrypoints are installed: `msbc` (branded) and `clinstagram` (compat).
 
@@ -83,6 +91,7 @@ your account **action-blocked, shadow-banned, or permanently suspended**.
 - Respect the rate limits in `~/.clinstagram/config.toml` (they exist for a reason).
 - Prefer **warm-up** (a like / a genuine comment) before any cold DM.
 - One *personalized* message ≠ mass copy-paste. The first is outreach; the second is spam.
+- Stay within Instagram's terms of service and the messaging law that applies to you.
 
 The MCP layer ([mysetterbot-claw](https://github.com/mohamed-amine-ben-mallessa/mysetterbot-claw))
 defaults to **dry-run** for exactly this reason: it shows you the draft, you approve, then it sends.
@@ -122,6 +131,8 @@ python scripts/ig.py user info <username>
 `0` success · `1` user error · `2` auth/session · `3` rate-limited · `4` API error ·
 `5` challenge/2FA · `6` policy-blocked (growth gate / compliance) · `7` capability unavailable.
 
+Predictable enough that an agent can branch on them without parsing prose.
+
 ## Credits
 
 Fork of **[clinstagram](https://github.com/199-biotechnologies/clinstagram)** by
@@ -132,3 +143,9 @@ affiliated with or endorsed by Instagram / Meta. "Instagram" is a trademark of i
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+<p align="center">
+  <sub>Built by <a href="https://github.com/mohamed-amine-ben-mallessa">Mohamed Amine Ben Mallessa</a> · ⭐ star it if your agent stopped scraping HTML</sub>
+</p>
